@@ -57,7 +57,7 @@ export default function SignupPage() {
       toast.error(error.message);
     } else {
       toast.success("Welcome aboard, Nakama! 🏴‍☠️ Your voyage begins!");
-      router.push("/arcs");
+      router.push("/dashboard");
     }
     setLoading(false);
   }
