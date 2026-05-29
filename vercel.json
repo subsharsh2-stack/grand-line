@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/admin/sync-episodes?mode=new",
+      "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/ai/quiz",
+      "schedule": "0 7 * * 1"
+    }
+  ]
+}
