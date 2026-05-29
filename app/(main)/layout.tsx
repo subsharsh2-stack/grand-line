@@ -10,7 +10,7 @@ export default async function MainLayout({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  let profile = null;
+  let profile: { username: string; display_name: string | null; bounty: number; rank: string; watch_streak: number; avatar_url: string | null } | null = null;
   if (user) {
     const { data } = await supabase
       .from("profiles")
