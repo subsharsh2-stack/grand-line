@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Flame, Trophy, Map, Swords, ArrowRight, Play, Zap } from "lucide-react";
-import { RANK_CONFIG, formatBounty, getRankProgress, getNextRank, getBountyToNextRank, type Profile } from "@/types";
-import { getStreakEmoji, getStreakTitle } from "@/lib/gamification";
+import { RANK_CONFIG, formatBounty, type Profile } from "@/types";
+import { getStreakEmoji, getStreakTitle, getRankProgress, getNextRank, getBountyToNextRank } from "@/lib/gamification";
 import { formatDistanceToNow } from "date-fns";
 import { AIRecommendationWidget } from "@/components/ai/ai-recommendation-widget";
 
