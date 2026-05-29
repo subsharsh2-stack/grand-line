@@ -37,7 +37,7 @@ export default async function Marketplace() {
   ]);
 
   // Find episode-specific deals for currently watching arc
-  const currentArcId = (currentEpisode?.episodes as { arc_id?: number } | null)?.arc_id;
+  const currentArcId = (currentEpisode as unknown as { episodes?: { arc_id?: number } } | null)?.episodes?.arc_id;
   const episodeDeals = merch?.filter((m) => m.arc_id === currentArcId || m.episode_id !== null) || [];
   const sitewideDeals = merch?.filter((m) => !m.episode_id && !m.arc_id) || [];
 
@@ -46,7 +46,7 @@ export default async function Marketplace() {
       episodeDeals={episodeDeals}
       sitewideDeals={sitewideDeals}
       fanArt={fanArt || []}
-      currentArcName={(currentEpisode?.episodes as { arcs?: { name: string } } | null)?.arcs?.name}
+      currentArcName={(currentEpisode as unknown as { episodes?: { arcs?: { name: string } } } | null)?.episodes?.arcs?.name}
     />
   );
 }

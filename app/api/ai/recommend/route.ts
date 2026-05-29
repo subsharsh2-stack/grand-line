@@ -35,8 +35,8 @@ export async function GET(req: NextRequest) {
 
   const hour = new Date().getHours();
   const timeOfDay = hour < 12 ? "morning" : hour < 17 ? "afternoon" : hour < 21 ? "evening" : "night";
-  const lastWatchedEp = (lastWatch?.episodes as { episode_number?: number } | null)?.episode_number || null;
-  const lastArc = (lastWatch?.episodes as { arc_name?: string } | null)?.arc_name || null;
+  const lastWatchedEp = (lastWatch as unknown as { episodes?: { episode_number?: number } } | null)?.episodes?.episode_number || null;
+  const lastArc = (lastWatch as unknown as { episodes?: { arc_name?: string } } | null)?.episodes?.arc_name || null;
   const daysSinceLastWatch = profile.last_watched_at
     ? Math.floor((Date.now() - new Date(profile.last_watched_at).getTime()) / (1000 * 60 * 60 * 24))
     : 999;
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
 
   if (type === "arc") {
     const completed = (completedArcs || [])
-      .map((ap) => (ap.arcs as { name?: string } | null)?.name || "")
+      .map((ap) => (ap as unknown as { arcs?: { name?: string } } | null)?.arcs?.name || "")
       .filter(Boolean);
     const rec = await getNextArcRecommendation({
       completedArcs: completed,

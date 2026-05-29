@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     {
       username: profile?.username || "Nakama",
       episodesWatched: profile?.total_episodes_watched || 0,
-      lastArc: (lastWatch?.episodes as { arc_name?: string } | null)?.arc_name || null,
+      lastArc: (lastWatch as unknown as { episodes?: { arc_name?: string } } | null)?.episodes?.arc_name || null,
     }
   );
 

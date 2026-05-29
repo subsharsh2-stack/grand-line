@@ -31,7 +31,7 @@ function ActivityMessage({ item }: { item: ActivityItem }) {
         Watched <span className="text-white font-medium">Episode {data.episode_number as number}</span>
         {" — "}<span className="text-slate-400 italic">{data.episode_title as string}</span>
         {" "}<span className="text-gold-400 text-xs">+฿{data.bounty_earned as number}</span>
-        {data.quiz_passed && <span className="text-blue-400 text-xs ml-1">✓ Quiz</span>}
+        {(data.quiz_passed as boolean) && <span className="text-blue-400 text-xs ml-1">✓ Quiz</span>}
         {(data.streak as number) > 1 && <span className="text-orange-400 text-xs ml-1">🔥 {data.streak as number}d streak</span>}
       </span>
     );
