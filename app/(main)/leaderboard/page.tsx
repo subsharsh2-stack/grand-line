@@ -37,7 +37,9 @@ export default async function Leaderboard() {
   // Aggregate weekly data
   const weeklyMap: Record<string, { user_id: string; total: number; username: string; display_name: string | null; rank: string; avatar_url: string | null }> = {};
   weeklyTop?.forEach((tx) => {
-    const profile = tx.profiles as { username: string; display_name: string | null; rank: string; avatar_url: string | null } | null;
+    type ProfileShape = { username: string; display_name: string | null; rank: string; avatar_url: string | null };
+    const rawProfiles = tx.profiles as unknown;
+    const profile: ProfileShape | null = Array.isArray(rawProfiles) ? (rawProfiles[0] as ProfileShape) ?? null : (rawProfiles as ProfileShape | null);
     if (!tx.user_id || !profile) return;
     if (!weeklyMap[tx.user_id]) {
       weeklyMap[tx.user_id] = { user_id: tx.user_id, total: 0, username: profile.username, display_name: profile.display_name, rank: profile.rank, avatar_url: profile.avatar_url };

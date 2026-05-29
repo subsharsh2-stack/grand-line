@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { RANK_CONFIG, getRankProgress, getBountyToNextRank, getNextRank, formatBounty, type Profile } from "@/types";
-import { getStreakTitle, getStreakEmoji } from "@/lib/gamification";
+import { RANK_CONFIG, formatBounty, type Profile } from "@/types";
+import { getStreakTitle, getStreakEmoji, getRankProgress, getBountyToNextRank, getNextRank } from "@/lib/gamification";
 import { Flame, Trophy, Map, Zap, Star } from "lucide-react";
 
 interface Props {
