@@ -12,7 +12,7 @@ export default async function Challenges() {
   const [{ data: challenges }, { data: userChallenges }, { data: profile }] = await Promise.all([
     supabase.from("challenges").select("*, arcs(name)").eq("is_active", true).order("bounty_reward", { ascending: false }),
     supabase.from("user_challenges").select("*").eq("user_id", user.id),
-    supabase.from("profiles").select("total_episodes_watched, watch_streak, total_arcs_completed").eq("id", user.id).single(),
+    supabase.from("profiles").select("total_episodes_watched, watch_streak, total_arcs_completed").eq("id", user.id).maybeSingle(),
   ]);
 
   const userChallengeMap = Object.fromEntries(

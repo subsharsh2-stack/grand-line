@@ -13,7 +13,7 @@ export default async function HomePage() {
   const watchedIds = watchedEpisodeIds?.map((w: any) => w.episode_id).join(",") || "0";
 
   // Get user's crew_id first
-  const { data: profileForCrew } = await supabase.from("profiles").select("crew_id").eq("id", user.id).single();
+  const { data: profileForCrew } = await supabase.from("profiles").select("crew_id").eq("id", user.id).maybeSingle();
   const crewQuery = profileForCrew?.crew_id
     ? supabase.from("crews").select("*, crew_members(count)").eq("id", profileForCrew.crew_id).maybeSingle()
     : Promise.resolve({ data: null });
@@ -26,12 +26,12 @@ export default async function HomePage() {
     { data: challenges },
     { data: nextEpisode },
   ] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("activity_feed").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
     supabase.from("watch_progress").select("episode_id").eq("user_id", user.id),
     crewQuery as any,
     supabase.from("challenges").select("*").eq("is_active", true).limit(3),
-    supabase.from("episodes").select("id, episode_number, title, arc_name, bounty_reward").not("id", "in", `(${watchedIds})`).order("episode_number").limit(1).single(),
+    supabase.from("episodes").select("id, episode_number, title, arc_name, bounty_reward").not("id", "in", `(${watchedIds})`).order("episode_number").limit(1).maybeSingle(),
   ]);
   const crew = crewResult?.data;
 

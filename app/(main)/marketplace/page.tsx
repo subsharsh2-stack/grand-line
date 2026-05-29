@@ -33,7 +33,7 @@ export default async function Marketplace() {
       .eq("user_id", user.id)
       .order("watched_at", { ascending: false })
       .limit(1)
-      .single(),
+      .maybeSingle(),
   ]);
 
   // Find episode-specific deals for currently watching arc

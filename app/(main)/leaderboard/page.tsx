@@ -23,7 +23,7 @@ export default async function Leaderboard() {
       .from("profiles")
       .select("id, username, bounty, rank")
       .eq("id", user.id)
-      .single(),
+      .maybeSingle(),
     // Weekly: most bounty earned in last 7 days
     supabase
       .from("bounty_transactions")

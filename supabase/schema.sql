@@ -416,14 +416,41 @@ CREATE POLICY "activity_feed_own_write" ON activity_feed
 -- Auto-create profile on signup
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  base_username TEXT;
+  final_username TEXT;
+  counter INTEGER := 0;
 BEGIN
+  -- Build base username from metadata or email prefix
+  base_username := COALESCE(
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'username'), ''),
+    LOWER(REGEXP_REPLACE(split_part(NEW.email, '@', 1), '[^a-z0-9_]', '_', 'g'))
+  );
+  -- Ensure it's at least 3 chars
+  IF LENGTH(base_username) < 3 THEN
+    base_username := base_username || '_user';
+  END IF;
+  final_username := base_username;
+
+  -- Handle username collisions by appending a number
+  WHILE EXISTS (SELECT 1 FROM profiles WHERE username = final_username) LOOP
+    counter := counter + 1;
+    final_username := base_username || counter::TEXT;
+  END LOOP;
+
   INSERT INTO profiles (id, username, display_name, avatar_url)
   VALUES (
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1)),
-    COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1)),
+    final_username,
+    COALESCE(NULLIF(TRIM(NEW.raw_user_meta_data->>'display_name'), ''), final_username),
     COALESCE(NEW.raw_user_meta_data->>'avatar_url', NULL)
-  );
+  )
+  ON CONFLICT (id) DO NOTHING;  -- Safe if profile already exists
+
+  RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  -- Never block user creation — log and continue
+  RAISE WARNING 'handle_new_user failed for %: %', NEW.id, SQLERRM;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

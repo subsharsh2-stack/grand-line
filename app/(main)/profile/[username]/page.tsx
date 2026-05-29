@@ -21,7 +21,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
       .from("profiles")
       .select("*")
       .eq("username", params.username)
-      .single(),
+      .maybeSingle(),
   ]);
 
   if (!profile) notFound();
@@ -41,7 +41,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
       .eq("user_id", profile.id)
       .order("earned_at", { ascending: false }),
     profile.crew_id
-      ? supabase.from("crews").select("*").eq("id", profile.crew_id).single()
+      ? supabase.from("crews").select("*").eq("id", profile.crew_id).maybeSingle()
       : Promise.resolve({ data: null }),
     supabase
       .from("arc_progress")
