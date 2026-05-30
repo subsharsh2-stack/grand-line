@@ -23,18 +23,10 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // Protect dashboard routes
-  const protectedPaths = ["/dashboard", "/arcs", "/episodes", "/profile", "/crew", "/leaderboard", "/marketplace", "/challenges"];
-  const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p));
-
-  if (isProtected && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("redirect", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
-  }
+  // IMPORTANT: Do not add auth redirect logic here.
+  // Just refresh the session so server components can read it.
+  // Route protection is handled inside each page/layout.
+  await supabase.auth.getUser();
 
   return supabaseResponse;
 }

@@ -16,7 +16,7 @@ export default async function MainLayout({
       .from("profiles")
       .select("username, display_name, bounty, rank, watch_streak, avatar_url")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
     profile = data;
   }
 
