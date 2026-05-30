@@ -1,13 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { LeaderboardPage } from "@/components/leaderboard/leaderboard-page";
-import { redirect } from "next/navigation";
 
 export const metadata = { title: "World Bounty Leaderboard" };
 
 export default async function Leaderboard() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?redirect=/leaderboard");
+  const userId = user?.id || null;
 
   const [
     { data: globalTop },
@@ -19,12 +18,9 @@ export default async function Leaderboard() {
       .select("id, username, display_name, bounty, rank, watch_streak, total_episodes_watched, avatar_url, crew_id")
       .order("bounty", { ascending: false })
       .limit(50),
-    supabase
-      .from("profiles")
-      .select("id, username, bounty, rank")
-      .eq("id", user.id)
-      .maybeSingle(),
-    // Weekly: most bounty earned in last 7 days
+    userId
+      ? supabase.from("profiles").select("id, username, bounty, rank").eq("id", userId).maybeSingle()
+      : Promise.resolve({ data: null }),
     supabase
       .from("bounty_transactions")
       .select("user_id, amount, profiles(username, display_name, avatar_url, rank)")
@@ -36,10 +32,9 @@ export default async function Leaderboard() {
 
   // Aggregate weekly data
   const weeklyMap: Record<string, { user_id: string; total: number; username: string; display_name: string | null; rank: string; avatar_url: string | null }> = {};
-  weeklyTop?.forEach((tx) => {
-    type ProfileShape = { username: string; display_name: string | null; rank: string; avatar_url: string | null };
+  (weeklyTop || []).forEach((tx: any) => {
     const rawProfiles = tx.profiles as unknown;
-    const profile: ProfileShape | null = Array.isArray(rawProfiles) ? (rawProfiles[0] as ProfileShape) ?? null : (rawProfiles as ProfileShape | null);
+    const profile: any = Array.isArray(rawProfiles) ? (rawProfiles[0] ?? null) : (rawProfiles ?? null);
     if (!tx.user_id || !profile) return;
     if (!weeklyMap[tx.user_id]) {
       weeklyMap[tx.user_id] = { user_id: tx.user_id, total: 0, username: profile.username, display_name: profile.display_name, rank: profile.rank, avatar_url: profile.avatar_url };
@@ -49,7 +44,7 @@ export default async function Leaderboard() {
   const weeklyLeaders = Object.values(weeklyMap).sort((a, b) => b.total - a.total).slice(0, 20);
 
   // Find user's global rank
-  const myRankPosition = (globalTop || []).findIndex((p) => p.id === user.id) + 1;
+  const myRankPosition = userId ? (globalTop || []).findIndex((p: any) => p.id === userId) + 1 : 0;
 
   return (
     <LeaderboardPage

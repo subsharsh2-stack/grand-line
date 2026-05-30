@@ -1,27 +1,28 @@
 import { createClient } from "@/lib/supabase/server";
 import { GrandLineMap } from "@/components/arcs/grand-line-map";
 import { ArcList } from "@/components/arcs/arc-list";
-import { redirect } from "next/navigation";
 
 export const metadata = { title: "Grand Line Map" };
 
 export default async function ArcsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?redirect=/arcs");
+  const userId = user?.id || null;
 
   const [{ data: arcs }, { data: arcProgress }] = await Promise.all([
     supabase.from("arcs").select("*").order("order_index"),
-    supabase.from("arc_progress").select("*").eq("user_id", user.id),
+    userId
+      ? supabase.from("arc_progress").select("*").eq("user_id", userId)
+      : Promise.resolve({ data: [] }),
   ]);
 
   // Build a progress map
   const progressMap: Record<number, { status: string; episodes_watched: number }> = {};
-  arcProgress?.forEach((ap) => {
+  (arcProgress || []).forEach((ap: any) => {
     progressMap[ap.arc_id] = { status: ap.status, episodes_watched: ap.episodes_watched };
   });
 
-  const arcsWithProgress = (arcs || []).map((arc) => ({
+  const arcsWithProgress = (arcs || []).map((arc: any) => ({
     ...arc,
     userStatus: progressMap[arc.id]?.status || "not_started",
     episodesWatched: progressMap[arc.id]?.episodes_watched || 0,

@@ -1,13 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { MarketplacePage } from "@/components/marketplace/marketplace-page";
-import { redirect } from "next/navigation";
 
 export const metadata = { title: "Sabaody Market — Merch & Fan Art" };
 
 export default async function Marketplace() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?redirect=/marketplace");
+  const userId = user?.id || null;
 
   const [
     { data: merch },
@@ -26,20 +25,20 @@ export default async function Marketplace() {
       .eq("status", "active")
       .order("created_at", { ascending: false })
       .limit(20),
-    // Get user's latest watched episode for contextual deals
-    supabase
-      .from("watch_progress")
-      .select("episode_id, episodes(episode_number, arc_id, arcs(name))")
-      .eq("user_id", user.id)
-      .order("watched_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+    userId
+      ? supabase
+          .from("watch_progress")
+          .select("episode_id, episodes(episode_number, arc_id, arcs(name))")
+          .eq("user_id", userId)
+          .order("watched_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
 
-  // Find episode-specific deals for currently watching arc
   const currentArcId = (currentEpisode as unknown as { episodes?: { arc_id?: number } } | null)?.episodes?.arc_id;
-  const episodeDeals = merch?.filter((m) => m.arc_id === currentArcId || m.episode_id !== null) || [];
-  const sitewideDeals = merch?.filter((m) => !m.episode_id && !m.arc_id) || [];
+  const episodeDeals = merch?.filter((m: any) => m.arc_id === currentArcId || m.episode_id !== null) || [];
+  const sitewideDeals = merch?.filter((m: any) => !m.episode_id && !m.arc_id) || [];
 
   return (
     <MarketplacePage

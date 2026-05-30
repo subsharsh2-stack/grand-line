@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/nav/navbar";
 import { DenDenMushi } from "@/components/ai/den-den-mushi";
+import { ClientAuthGuard } from "@/components/auth/client-auth-guard";
 
 export default function MainLayout({
   children,
@@ -10,7 +11,7 @@ export default function MainLayout({
     <div className="min-h-screen bg-[#080c14] starfield">
       <Navbar profile={null} />
       <main className="pt-16">
-        {children}
+        <ClientAuthGuard>{children}</ClientAuthGuard>
       </main>
       <DenDenMushi />
     </div>

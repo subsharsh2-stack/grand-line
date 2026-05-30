@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { EpisodeBrowser } from "@/components/episodes/episode-browser";
-import { redirect } from "next/navigation";
 
 export const metadata = { title: "Episodes — Log Pose" };
 
@@ -11,7 +10,7 @@ export default async function EpisodesPage({
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?redirect=/episodes");
+  const userId = user?.id || null;
 
   const page = parseInt(searchParams.page || "1");
   const pageSize = 48;
@@ -35,17 +34,19 @@ export default async function EpisodesPage({
   const [{ data: episodes, count }, { data: arcs }, { data: watchedEps }] = await Promise.all([
     query,
     supabase.from("arcs").select("id, slug, name, saga").order("order_index"),
-    supabase.from("watch_progress").select("episode_id, quiz_passed, bounty_earned").eq("user_id", user.id),
+    userId
+      ? supabase.from("watch_progress").select("episode_id, quiz_passed, bounty_earned").eq("user_id", userId)
+      : Promise.resolve({ data: [] }),
   ]);
 
-  const watchedSet = new Set(watchedEps?.map((w) => w.episode_id) || []);
+  const watchedSet = new Set((watchedEps || []).map((w: any) => w.episode_id));
   const watchedMap = Object.fromEntries(
-    (watchedEps || []).map((w) => [w.episode_id, { quiz_passed: w.quiz_passed, bounty_earned: w.bounty_earned }])
+    (watchedEps || []).map((w: any) => [w.episode_id, { quiz_passed: w.quiz_passed, bounty_earned: w.bounty_earned }])
   );
 
   return (
     <EpisodeBrowser
-      episodes={(episodes || []).map((ep) => ({
+      episodes={(episodes || []).map((ep: any) => ({
         ...ep,
         isWatched: watchedSet.has(ep.id),
         quizPassed: watchedMap[ep.id]?.quiz_passed || false,
