@@ -10,6 +10,7 @@ import {
   Flame, Zap
 } from "lucide-react";
 import { formatBounty, RANK_CONFIG } from "@/types";
+import { createClient } from "@/lib/supabase/client";
 
 const NAV_ITEMS = [
   { href: "/arcs",        label: "Grand Line",  icon: Map,       description: "Arc progress map" },
@@ -31,16 +32,32 @@ interface NavbarProps {
   } | null;
 }
 
-export function Navbar({ profile }: NavbarProps) {
+export function Navbar({ profile: profileProp }: NavbarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profile, setProfile] = useState(profileProp ?? null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
+  }, []);
+
+  // Fetch profile client-side if not provided by server
+  useEffect(() => {
+    if (profile) return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase
+        .from("profiles")
+        .select("username, display_name, bounty, rank, watch_streak, avatar_url")
+        .eq("id", user.id)
+        .maybeSingle()
+        .then(({ data }) => { if (data) setProfile(data); });
+    });
   }, []);
 
   const rankInfo = profile?.rank
