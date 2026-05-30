@@ -55,11 +55,11 @@ export default function SignupPage() {
     });
     if (error) {
       toast.error(error.message);
+      setLoading(false);
     } else {
       toast.success("Welcome aboard, Nakama! 🏴‍☠️ Your voyage begins!");
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     }
-    setLoading(false);
   }
 
   return (

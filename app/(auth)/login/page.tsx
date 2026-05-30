@@ -26,12 +26,11 @@ function LoginForm() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       toast.error(error.message);
+      setLoading(false);
     } else {
-      toast.success("Welcome back, Nakama! 🏴‍☠️");
-      router.push(redirect);
-      router.refresh();
+      // Hard redirect so the session cookie is sent with the very first request
+      window.location.href = redirect;
     }
-    setLoading(false);
   }
 
   async function handleGoogleLogin() {
