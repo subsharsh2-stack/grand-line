@@ -1,19 +1,10 @@
-import { Navbar } from "@/components/nav/navbar";
-import { DenDenMushi } from "@/components/ai/den-den-mushi";
 import { ClientAuthGuard } from "@/components/auth/client-auth-guard";
+import { LayoutShell } from "@/components/nav/layout-shell";
 
-export default function MainLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#080c14] starfield">
-      <Navbar profile={null} />
-      <main className="pt-16">
-        <ClientAuthGuard>{children}</ClientAuthGuard>
-      </main>
-      <DenDenMushi />
-    </div>
+    <ClientAuthGuard>
+      <LayoutShell>{children}</LayoutShell>
+    </ClientAuthGuard>
   );
 }
